@@ -4,7 +4,7 @@ export const parseErrors = (err) => {
   if (err?.response?.data?.error?.name === "ValidationError") {
     return {
       message: err.response.data.error.message,
-      details: err.response.data.error.details,
+      details: err.response.data.error.details.errors,
     };
   }
   //check if it is a network error

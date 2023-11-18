@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import "../styles/form.scss";
-import axios from "axios";
 import { Link } from "react-router-dom";
-import Alert from "../alert/Alert";
+import axios from "axios";
 import { parseErrors } from "../utils/parseErrors";
+import Alert from "../alert/Alert";
 
 export default function register() {
   const [firstname, setFirstName] = useState("");
@@ -11,53 +11,56 @@ export default function register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState({});
+  const [alert, setAlert] = useState({});
 
   //send data to backend
 
-  const registerUser = async (person) => {
-    //validate confirm password
-    if (person.password !== person.confirmPassword) {
-      setError({ message: "Passwords do not match" });
-      return;
+  const handleSubmit = async (e) => {
+    e.preventDefault(); //prevent default form submission
+
+    //check if password and confirm password match
+    if (password !== confirmPassword) {
+      setAlert({
+        message: "Password and confirm password do not match",
+        details: [],
+      });
+      return; //exit early, i.e the below code would not run any more
     }
+
+    const data = {
+      firstname,
+      lastname,
+      email,
+      password,
+      username: email,
+    };
 
     try {
       const res = await axios.post(
         "http://localhost:1337/api/auth/local/register",
-        person
+        data
       );
 
-      setError({});
+      //reset out state
       setFirstName("");
       setLastName("");
       setEmail("");
       setPassword("");
       setConfirmPassword("");
-
-      // console.log(res);
+      setAlert({
+        message: "Account created sucessfully",
+        details: [],
+        type: "success",
+      });
     } catch (err) {
-      console.log(parseErrors(err));
+      setAlert(parseErrors(err));
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault(); //prevent default form submission
-
-    const user = {
-      firstname,
-      lastname,
-      username: email,
-      email,
-      password,
-      confirmPassword,
-    };
-    registerUser(user);
-  };
-
+  // {alert.message && <Alert type="success" datas={alert} />}
   return (
     <>
-      {error.message && <Alert type="error" error={error} />}
+      <Alert datas={alert} />
       <form className="form form--page" onSubmit={handleSubmit}>
         <div className="form__group form__group--page">
           <label className="form__label">First name</label>
